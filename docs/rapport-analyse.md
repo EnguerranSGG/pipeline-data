@@ -44,6 +44,12 @@ Le DAG `weather_pipeline` est listé et **actif** (interrupteur à droite). Le p
 
 ![Airflow sur la VM — weather_pipeline accessible](../images/interface-deployee.png)
 
+Run manuel sur la VM `manual__2026-09-10T12:11:47.966331+00:00` : état global **Succès** (durée **12,821 s**).
+
+Le graphe à gauche confirme l’ordre `extract` → `transform` → `load`, toutes les tâches au vert. `extract` est au try n°2 ; `transform` et `load` au try n°1.
+
+![Exécution réussie du DAG sur la VM](../images/dag-succes-vps.png)
+
 ---
 
 ## 4. Résultat CI (validation du traitement)
