@@ -9,7 +9,7 @@ PROCESSED_FILE = DATA_DIR / "processed" / "weather.csv"
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://airflow:airflow@localhost:5434/weather",
+    "postgresql://airflow:airflow@localhost:5445/weather",
 )
 
 
