@@ -5,7 +5,7 @@ services:
 
   postgres:
     image: postgres:16
-    container_name: weather-postgres
+    container_name: enguerran-weather-postgres
     restart: unless-stopped
 
     environment:
@@ -26,7 +26,7 @@ services:
 
   airflow-db:
     image: postgres:16
-    container_name: airflow-db
+    container_name: enguerran-airflow-db
     restart: unless-stopped
 
     environment:
@@ -43,7 +43,7 @@ services:
 
   airflow-init:
     image: pipeline-airflow:3.3.1
-    container_name: airflow-init
+    container_name: enguerran-airflow-init
 
     depends_on:
       - airflow-db
@@ -66,7 +66,7 @@ services:
 
   airflow-apiserver:
     image: pipeline-airflow:3.3.1
-    container_name: airflow-apiserver
+    container_name: enguerran-airflow-apiserver
     restart: unless-stopped
 
     depends_on:
@@ -98,7 +98,7 @@ services:
 
   airflow-scheduler:
     image: pipeline-airflow:3.3.1
-    container_name: airflow-scheduler
+    container_name: enguerran-airflow-scheduler
     restart: unless-stopped
 
     depends_on:
@@ -128,7 +128,7 @@ services:
 
   airflow-dag-processor:
     image: pipeline-airflow:3.3.1
-    container_name: airflow-dag-processor
+    container_name: enguerran-airflow-dag-processor
     restart: unless-stopped
 
     depends_on:
