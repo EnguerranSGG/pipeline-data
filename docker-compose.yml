@@ -1,4 +1,8 @@
 services:
+  # =========================
+  # DATA WAREHOUSE
+  # =========================
+
   postgres:
     image: postgres:16
     container_name: weather-postgres
@@ -16,5 +20,137 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  # =========================
+  # AIRFLOW METADATA DATABASE
+  # =========================
+
+  airflow-db:
+    image: postgres:16
+    container_name: airflow-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+
+    volumes:
+      - airflow_db_data:/var/lib/postgresql/data
+
+  # =========================
+  # AIRFLOW INIT
+  # =========================
+
+  airflow-init:
+    image: pipeline-airflow:3.3.1
+    container_name: airflow-init
+
+    depends_on:
+      - airflow-db
+
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+      _AIRFLOW_DB_MIGRATE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USERNAME}
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD}
+      DATA_DIR: /opt/airflow/data
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_JWT_SECRET}
+
+    command: version
+
+  # =========================
+  # AIRFLOW API / UI
+  # =========================
+
+  airflow-apiserver:
+    image: pipeline-airflow:3.3.1
+    container_name: airflow-apiserver
+    restart: unless-stopped
+
+    depends_on:
+      - airflow-db
+
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+      DATABASE_URL: postgresql://airflow:airflow@postgres:5432/weather
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+      DATA_DIR: /opt/airflow/data
+      AIRFLOW__CORE__HOSTNAME_CALLABLE: "airflow.utils.net.getfqdn"
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: "http://airflow-apiserver:8080/execution/"
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_JWT_SECRET}
+
+    ports:
+      - "8080:8080"
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
+      - ./data:/opt/airflow/data
+
+    command: api-server
+
+  # =========================
+  # AIRFLOW SCHEDULER
+  # =========================
+
+  airflow-scheduler:
+    image: pipeline-airflow:3.3.1
+    container_name: airflow-scheduler
+    restart: unless-stopped
+
+    depends_on:
+      - airflow-db
+      - airflow-apiserver
+
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+      DATABASE_URL: postgresql://airflow:airflow@postgres:5432/weather
+      DATA_DIR: /opt/airflow/data
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+      AIRFLOW__CORE__HOSTNAME_CALLABLE: "airflow.utils.net.getfqdn"
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: "http://airflow-apiserver:8080/execution/"
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_JWT_SECRET}
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
+      - ./data:/opt/airflow/data
+
+    command: scheduler
+
+  # =========================
+  # AIRFLOW DAG PROCESSOR
+  # =========================
+
+  airflow-dag-processor:
+    image: pipeline-airflow:3.3.1
+    container_name: airflow-dag-processor
+    restart: unless-stopped
+
+    depends_on:
+      - airflow-db
+
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+      DATABASE_URL: postgresql://airflow:airflow@postgres:5432/weather
+      DATA_DIR: /opt/airflow/data
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+      AIRFLOW__CORE__HOSTNAME_CALLABLE: "airflow.utils.net.getfqdn"
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: "http://airflow-apiserver:8080/execution/"
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_JWT_SECRET}
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
+      - ./data:/opt/airflow/data
+
+    command: dag-processor
+
 volumes:
   postgres_data:
+  airflow_db_data:

@@ -1,12 +1,13 @@
+import os
 import json
 from pathlib import Path
 
 import pandas as pd
 
+DATA_DIR = Path(os.getenv("DATA_DIR", "data"))
 
-RAW_DIR = Path("data/raw")
-PROCESSED_DIR = Path("data/processed")
-
+RAW_DIR = DATA_DIR / "raw"
+PROCESSED_DIR = DATA_DIR / "processed"
 
 def get_latest_raw_file() -> Path:
     json_files = list(RAW_DIR.glob("weather_*.json"))

@@ -1,3 +1,4 @@
+import os
 import json
 from datetime import datetime
 from pathlib import Path
@@ -7,7 +8,9 @@ import requests
 
 API_URL = "https://api.open-meteo.com/v1/forecast"
 
-RAW_DIR = Path("data/raw")
+RAW_DIR = Path(
+    os.getenv("DATA_DIR", "data")
+) / "raw"
 
 
 def extract_weather():

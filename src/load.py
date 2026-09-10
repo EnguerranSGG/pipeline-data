@@ -1,10 +1,11 @@
 import os
+from pathlib import Path
 
 import pandas as pd
 from sqlalchemy import create_engine, text
 
-
-PROCESSED_FILE = "data/processed/weather.csv"
+DATA_DIR = Path(os.getenv("DATA_DIR", "data"))
+PROCESSED_FILE = DATA_DIR / "processed" / "weather.csv"
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
