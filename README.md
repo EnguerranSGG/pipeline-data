@@ -46,7 +46,7 @@ extract → transform → load
 | `weather-postgres` | Entrepôt de données (`weather`), port hôte **5434** |
 | `airflow-db` | Métadonnées Airflow |
 | `airflow-init` | Migrations de la base Airflow |
-| `airflow-apiserver` | API + interface web (`http://localhost:8080`) |
+| `airflow-apiserver` | API + interface web (`http://localhost:8081`) |
 | `airflow-scheduler` | Planification et exécution (`LocalExecutor`) |
 | `airflow-dag-processor` | Parsing des DAGs |
 | GitHub Actions | CI : exécution de Pytest à chaque push / PR sur `main` |
@@ -110,7 +110,7 @@ Services attendus : `weather-postgres`, `airflow-db`, `airflow-apiserver`, `airf
 
 ### 5. Vérifier l’interface Airflow
 
-Ouvrir [http://localhost:8080](http://localhost:8080). Le DAG `weather_pipeline` doit apparaître (Simple Auth Manager, accès admin ouvert en local).
+Ouvrir [http://localhost:8081](http://localhost:8081). Le DAG `weather_pipeline` doit apparaître (Simple Auth Manager, accès admin ouvert en local).
 
 ### 6. Arrêter l’environnement
 
@@ -147,7 +147,7 @@ psql -h localhost -p 5434 -U airflow -d weather -c "SELECT * FROM weather ORDER 
 ### B. Pipeline orchestré (Airflow)
 
 1. Démarrer Docker Compose (voir ci-dessus).
-2. Aller sur [http://localhost:8080](http://localhost:8080).
+2. Aller sur [http://localhost:8081](http://localhost:8081).
 3. Activer le DAG `weather_pipeline`.
 4. Lancer un run manuel (**Trigger DAG**) ou attendre le cron horaire `@hourly`.
 
@@ -174,7 +174,7 @@ pytest -v
 
 ```text
 NAME                    IMAGE                    STATUS         PORTS
-airflow-apiserver       pipeline-airflow:3.3.1   Up             0.0.0.0:8080->8080/tcp
+airflow-apiserver       pipeline-airflow:3.3.1   Up             0.0.0.0:8081->8080/tcp
 airflow-dag-processor   pipeline-airflow:3.3.1   Up             8080/tcp
 airflow-db              postgres:16              Up             5432/tcp
 airflow-scheduler       pipeline-airflow:3.3.1   Up             8080/tcp
@@ -220,7 +220,7 @@ Run `ci: add GitHub Actions pytest workflow #2` : job **tests** en succès (21 s
 
 ### Interface Airflow
 
-DAG `weather_pipeline` listé et actif sur [http://localhost:8080](http://localhost:8080) : dernière exécution réussie le 10/09/2026 à 13:00, prochaine à 14:00.
+DAG `weather_pipeline` listé et actif sur [http://localhost:8081](http://localhost:8081) : dernière exécution réussie le 10/09/2026 à 13:00, prochaine à 14:00.
 
 ![Liste des DAGs Airflow — weather_pipeline actif](images/dag-interface.png)
 
