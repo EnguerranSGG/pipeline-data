@@ -41,15 +41,17 @@ Orchestration Airflow 3.3.1 (`DAG weather_pipeline`, schedule `@hourly`) :
 extract → transform → load
 ```
 
-| Composant | Rôle |
-| --- | --- |
-| `weather-postgres` | Entrepôt de données (`weather`), port hôte **5445** |
-| `airflow-db` | Métadonnées Airflow |
-| `airflow-init` | Migrations de la base Airflow |
-| `airflow-apiserver` | API + interface web (`http://localhost:8181`) |
-| `airflow-scheduler` | Planification et exécution (`LocalExecutor`) |
-| `airflow-dag-processor` | Parsing des DAGs |
-| GitHub Actions | CI : exécution de Pytest à chaque push / PR sur `main` |
+| Service Compose | Conteneur | Rôle |
+| --- | --- | --- |
+| `postgres` | `enguerran-weather-postgres` | Entrepôt de données (`weather`), port hôte **5445** |
+| `airflow-db` | `enguerran-airflow-db` | Métadonnées Airflow |
+| `airflow-init` | `enguerran-airflow-init` | Migrations de la base Airflow |
+| `airflow-apiserver` | `enguerran-airflow-apiserver` | API + interface web (`http://localhost:8181`) |
+| `airflow-scheduler` | `enguerran-airflow-scheduler` | Planification et exécution (`LocalExecutor`) |
+| `airflow-dag-processor` | `enguerran-airflow-dag-processor` | Parsing des DAGs |
+| GitHub Actions | — | CI/CD : Pytest, puis déploiement SSH sur `main` |
+
+Les **services** Compose (`postgres`, `airflow-db`, `airflow-apiserver`, …) restent les hostnames du réseau Docker (`postgres:5432`, `airflow-db:5432`, `http://airflow-apiserver:8080/execution/`). Les **`container_name`** sont préfixés `enguerran-` pour éviter les collisions sur une VM partagée.
 
 Le chargement est idempotent : contrainte `UNIQUE(latitude, longitude, observation_time)` et `ON CONFLICT DO NOTHING`.
 
@@ -106,7 +108,7 @@ docker compose up -d
 docker compose ps
 ```
 
-Services attendus : `weather-postgres`, `airflow-db`, `airflow-apiserver`, `airflow-scheduler`, `airflow-dag-processor`. `airflow-init` se termine avec le code 0 après les migrations.
+Conteneurs attendus : `enguerran-weather-postgres`, `enguerran-airflow-db`, `enguerran-airflow-apiserver`, `enguerran-airflow-scheduler`, `enguerran-airflow-dag-processor`. `enguerran-airflow-init` se termine avec le code 0 après les migrations.
 
 ### 5. Vérifier l’interface Airflow
 
@@ -156,8 +158,8 @@ Les tâches s’enchaînent : `extract` → `transform` → `load`. Les fichiers
 Logs d’un service :
 
 ```bash
-docker logs airflow-scheduler --tail 50
-docker logs airflow-apiserver --tail 50
+docker logs enguerran-airflow-scheduler --tail 50
+docker logs enguerran-airflow-apiserver --tail 50
 ```
 
 ### C. Tests
@@ -173,12 +175,12 @@ pytest -v
 ### Services Docker
 
 ```text
-NAME                    IMAGE                    STATUS         PORTS
-airflow-apiserver       pipeline-airflow:3.3.1   Up             0.0.0.0:8181->8080/tcp
-airflow-dag-processor   pipeline-airflow:3.3.1   Up             8080/tcp
-airflow-db              postgres:16              Up             5432/tcp
-airflow-scheduler       pipeline-airflow:3.3.1   Up             8080/tcp
-weather-postgres        postgres:16              Up             0.0.0.0:5445->5432/tcp
+NAME                               IMAGE                    STATUS         PORTS
+enguerran-airflow-apiserver        pipeline-airflow:3.3.1   Up             0.0.0.0:8181->8080/tcp
+enguerran-airflow-dag-processor    pipeline-airflow:3.3.1   Up             8080/tcp
+enguerran-airflow-db               postgres:16              Up             5432/tcp
+enguerran-airflow-scheduler        pipeline-airflow:3.3.1   Up             8080/tcp
+enguerran-weather-postgres         postgres:16              Up             0.0.0.0:5445->5432/tcp
 ```
 
 ### Tests Pytest
