@@ -52,10 +52,18 @@ Le graphe à gauche confirme l’ordre `extract` → `transform` → `load`, tou
 
 ---
 
-## 4. Résultat CI (validation du traitement)
+## 4. Résultat CI/CD
 
 Workflow GitHub Actions `CI Pipeline`, run `ci: add GitHub Actions pytest workflow #2`.
 
 Job **tests** : **succès** en 21 s (checkout, Python, dépendances, `pytest`).
 
 ![GitHub Actions — job tests en succès](../images/ci-github-actions.png)
+
+Chaîne complète **CI/CD Pipeline**, run `ci: add SSH deploy job after tests #8`, déclenché par un push sur `main`.
+
+- Statut global : **Success** (36 s)
+- Job **tests** : succès (21 s)
+- Job **Deploy** : succès (9 s), exécuté après les tests
+
+![GitHub Actions — tests puis Deploy en succès](../images/run-cicd-succes.png)
