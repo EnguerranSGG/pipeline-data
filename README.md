@@ -214,6 +214,8 @@ Exemple de résultat réel :
 
 Workflow `.github/workflows/ci.yml` : checkout, Python 3.13, `pip install`, `pytest -v`.
 
+Après des tests réussis, un job **Deploy** s’exécute uniquement sur un **push** vers `main` (pas sur une pull request). Il se connecte en SSH à la VM, fait `git pull --ff-only` dans `/opt/pipeline-data`, puis `docker compose up -d`. Les identifiants SSH sont des secrets GitHub (`SERVER_HOST`, `SERVER_USER`, `SERVER_SSH_KEY`). Le fichier `.env` reste sur la VM et n’est jamais versionné.
+
 Run `ci: add GitHub Actions pytest workflow #2` : job **tests** en succès (21 s).
 
 ![GitHub Actions — job tests du workflow CI Pipeline en succès](images/ci-github-actions.png)
