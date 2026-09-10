@@ -228,6 +228,10 @@ Run planifié `scheduled__2026-09-10T11:00:00+00:00` en **Succès** : les trois 
 
 ![Exécution du DAG weather_pipeline — extract, transform et load en succès](images/dag-succes.png)
 
+Déploiement sur la VM Ubuntu : interface Airflow joignable à `http://81.17.94.238:8181`, DAG `weather_pipeline` listé et actif.
+
+![Airflow déployé sur la VM — weather_pipeline accessible sur le port 8181](images/interface-deployee.png)
+
 ## Structure du projet
 
 ```text
@@ -244,7 +248,8 @@ pipeline-data/
 ├── images/
 │   ├── ci-github-actions.png
 │   ├── dag-interface.png
-│   └── dag-succes.png
+│   ├── dag-succes.png
+│   └── interface-deployee.png
 ├── docker-compose.yml
 ├── Dockerfile
 ├── requirements.txt
